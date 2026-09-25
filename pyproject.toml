@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "lovepack"
+version = "0.1.0"
+description = "Universal LÖVE (Love2D) build engine and binary distribution manager."
+authors = ["OmgRod <rod@omgrod.me>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/OmgRod/lovepack"
+repository = "https://github.com/OmgRod/lovepack"
+keywords = ["love2d", "gamedev", "cli", "build-tool", "packaging"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Games/Entertainment"
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+urllib3 = "^2.0.0"
+
+[tool.poetry.scripts]
+lovepack = "lovepack.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
