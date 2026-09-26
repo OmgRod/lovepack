@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lovepack"
-version = "0.2.0"
+version = "0.3.0"
 description = "Universal LÖVE (Love2D) build engine and binary distribution manager."
 authors = ["OmgRod <rod@omgrod.me>"]
 readme = "README.md"
