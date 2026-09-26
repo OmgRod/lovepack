@@ -75,6 +75,11 @@ def conf_values(config: dict) -> dict:
     values = deepcopy(LOVE_CONF_DEFAULTS)
     values["identity"] = config.get("game", {}).get("name", values["identity"])
     values["version"] = config.get("love", {}).get("version", values["version"])
+    values["window"]["icon"] = (
+        config.get("game", {}).get("icon")
+        or config.get("build", {}).get("icon")
+        or values["window"]["icon"]
+    )
     return values
 
 

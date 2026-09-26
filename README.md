@@ -45,6 +45,20 @@ no `conf.lua` exists.
 file. Bytecode is written into the archive under the same `.lua` paths, which
 keeps `require` and `main.lua` resolution compatible.
 
+## Game Icons
+
+Set an icon source in `project.toml`:
+
+```toml
+[game]
+icon = "assets/icon.png"
+```
+
+Or set `t.window.icon = "assets/icon.png"` in an existing `conf.lua`. During a
+Windows build, lovepack converts that image to 256px Windows icon files named
+`game.ico` and `love.ico` inside `build/dist/<game>-win`, replacing the runtime
+bundle's icons without modifying the source image or `.love` archive.
+
 ## Build Commands
 
 Remove generated Love2D builds, wheel distributions, and Python cache folders:
@@ -59,6 +73,22 @@ force-reinstalls it into the active pip environment:
 ```powershell
 .\release.bat
 ```
+
+Create a GitHub Actions workflow that builds Windows, Linux, and macOS
+artifacts:
+
+```powershell
+lovepack github-action
+```
+
+This creates `.github/workflows/lovepack-build.yml`. Use `--force` to replace
+an existing generated workflow. The workflow installs LuaJIT, runs
+`lovepack build` on each platform, and uploads `build/dist/` as a separate
+artifact. Windows uses Scoop for LuaJIT; Linux publishes the `.love` package
+because LÖVE 11.5 does not publish a Linux runtime binary; macOS builds the
+standalone app bundle. The workflow installs lovepack from its GitHub
+repository so it uses the current platform fixes instead of a stale PyPI
+release.
 
 For a globally available command without publishing a package, install this
 checkout in editable mode:

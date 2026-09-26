@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lovepack"
-version = "0.3.0"
+version = "0.4.0"
 description = "Universal LÖVE (Love2D) build engine and binary distribution manager."
 authors = ["OmgRod <rod@omgrod.me>"]
 readme = "README.md"
@@ -23,6 +23,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.11"
 urllib3 = "^2.0.0"
+pillow = "^11.0.0"
 
 [tool.poetry.scripts]
 lovepack = "lovepack.cli:main"

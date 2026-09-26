@@ -8,6 +8,7 @@ import zipfile
 from pathlib import Path
 
 from .constants import CACHE_DIR
+from .icons import generate_windows_icons
 
 
 def get_platform_info():
@@ -66,7 +67,6 @@ def download_love_binary(version: str) -> Path:
 
 def build_executable(root_dir: Path, config: dict, love_file: Path):
     version = config.get("love", {}).get("version", "11.5")
-    binary_dir = download_love_binary(version)
     os_name, _ = get_platform_info()
     build_dir = root_dir / config.get("build", {}).get("output_dir", "build")
     game_name = config.get("game", {}).get("name", "Game")
@@ -75,6 +75,7 @@ def build_executable(root_dir: Path, config: dict, love_file: Path):
     print(f"\n[FUSING] Building standalone executable ({os_name.upper()})...")
 
     if os_name == "win":
+        binary_dir = download_love_binary(version)
         love_exe = next(binary_dir.rglob("love.exe"), None)
         if not love_exe:
             raise FileNotFoundError("Could not locate love.exe in binary cache.")
@@ -82,6 +83,7 @@ def build_executable(root_dir: Path, config: dict, love_file: Path):
         if exe_out_dir.exists():
             shutil.rmtree(exe_out_dir)
         shutil.copytree(love_exe.parent, exe_out_dir)
+        generate_windows_icons(root_dir, config, exe_out_dir)
         target_exe = exe_out_dir / f"{game_name}.exe"
         with target_exe.open("wb") as output:
             output.write(love_exe.read_bytes())
@@ -89,14 +91,14 @@ def build_executable(root_dir: Path, config: dict, love_file: Path):
         (exe_out_dir / "love.exe").unlink(missing_ok=True)
         print(f"[SUCCESS] Windows build output: {exe_out_dir.relative_to(root_dir)}")
     elif os_name == "linux":
-        love_bin = next(binary_dir.rglob("love"), None)
-        if not love_bin:
-            raise FileNotFoundError("Could not locate love binary in binary cache.")
-        target_bin = dist_dir / game_name
-        target_bin.write_bytes(love_bin.read_bytes() + love_file.read_bytes())
-        target_bin.chmod(0o755)
-        print(f"[SUCCESS] Linux build output: {target_bin.relative_to(root_dir)}")
+        target_file = dist_dir / f"{game_name}.love"
+        shutil.copy2(love_file, target_file)
+        print(
+            f"[SUCCESS] Linux release output: {target_file.relative_to(root_dir)} "
+            "(LÖVE 11.5 does not publish a Linux runtime binary)"
+        )
     else:
+        binary_dir = download_love_binary(version)
         love_app = next(binary_dir.rglob("love.app"), None)
         if not love_app:
             raise FileNotFoundError("Could not locate love.app in binary cache.")

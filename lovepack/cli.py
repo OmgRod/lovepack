@@ -5,6 +5,7 @@ from pathlib import Path
 from .clean import clean_project
 from .config import configure_project, initialize_project_files, load_config
 from .conf import ensure_conf_lua
+from .github import setup_github_action
 from .packaging import build_love_package
 from .runtime import build_executable
 
@@ -26,6 +27,16 @@ def create_parser():
     subparsers.add_parser("pack", help="Package project source into a .love zip archive")
     subparsers.add_parser("build", help="Package project and fuse with LÖVE binaries into an executable")
     subparsers.add_parser("clean", help="Remove generated build, distribution, and Python cache files")
+    github_parser = subparsers.add_parser(
+        "github-action",
+        help="Create a GitHub Actions workflow that builds all platforms and uploads artifacts",
+    )
+    github_parser.add_argument(
+        "--filename",
+        default="lovepack-build.yml",
+        help="Workflow filename under .github/workflows/",
+    )
+    github_parser.add_argument("--force", action="store_true", help="Replace an existing workflow")
 
     config_parser = subparsers.add_parser("config", help="Read and update project.toml settings")
     config_actions = config_parser.add_subparsers(dest="config_action", required=True)
@@ -74,6 +85,8 @@ def main():
             build_executable(root_dir, config, love_file)
         elif args.command == "clean":
             clean_project(root_dir)
+        elif args.command == "github-action":
+            setup_github_action(root_dir, args.filename, args.force)
     except (KeyError, ValueError, RuntimeError) as error:
         print(f"[ERROR] {error}")
         sys.exit(1)
