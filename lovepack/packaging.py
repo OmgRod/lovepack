@@ -1,4 +1,5 @@
 import fnmatch
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -28,19 +29,36 @@ def is_ignored(rel_path: Path, patterns: list[str]) -> bool:
     )
 
 
+def find_luajit(configured_compiler: str) -> str:
+    configured_path = shutil.which(configured_compiler)
+    candidates = [configured_path] if configured_path else []
+    candidates.append(shutil.which("luajit"))
+    for candidate in candidates:
+        if not candidate or "luajit" not in Path(candidate).stem.lower():
+            continue
+        result = subprocess.run([candidate, "-v"], capture_output=True, text=True)
+        version = f"{result.stdout}\n{result.stderr}"
+        if result.returncode == 0 and "luajit" in version.lower():
+            return candidate
+    raise RuntimeError(
+        "Lua bytecode requires LuaJIT for Love2D compatibility, but no local "
+        "LuaJIT executable was found. Install LuaJIT on PATH and retry."
+    )
+
+
 def compile_lua_file(source: Path, target: Path, compiler: str):
     target.parent.mkdir(parents=True, exist_ok=True)
     try:
         subprocess.run(
-            [compiler, "-o", str(target), str(source)],
+            [compiler, "-b", str(source), str(target)],
             check=True,
             capture_output=True,
             text=True,
         )
     except FileNotFoundError as error:
         raise RuntimeError(
-            f"Lua bytecode is enabled but '{compiler}' was not found. "
-            "Install luac or set build.lua_compiler."
+            f"LuaJIT bytecode compiler '{compiler}' was not found. "
+            "Install LuaJIT on PATH or set build.lua_compiler to its executable."
         ) from error
     except subprocess.CalledProcessError as error:
         detail = error.stderr.strip() or error.stdout.strip() or "unknown compiler error"
@@ -59,7 +77,9 @@ def build_love_package(root_dir: Path, config: dict) -> Path:
 
     patterns = load_ignore_patterns(root_dir)
     compile_bytecode = bool(build_config.get("compile_bytecode", False))
-    lua_compiler = build_config.get("lua_compiler", "luac")
+    lua_compiler = find_luajit(build_config.get("lua_compiler", "luajit")) if compile_bytecode else None
+    if lua_compiler:
+        print(f"            Compiler: {lua_compiler} (LuaJIT)")
     print(f"\n[PACKAGING] Project: '{game_name}'")
     print(f"            Target:  {out_love_path.relative_to(root_dir)}")
 

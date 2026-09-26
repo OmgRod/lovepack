@@ -13,7 +13,7 @@ def default_config(root_dir: Path) -> dict:
             "output_dir": "build",
             "love_filename": f"{root_dir.name}.love",
             "compile_bytecode": False,
-            "lua_compiler": "luac",
+            "lua_compiler": "luajit",
             "generate_conf_lua": True,
             "overwrite_conf_lua": False,
         },

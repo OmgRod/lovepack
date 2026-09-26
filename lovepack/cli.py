@@ -2,6 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .clean import clean_project
 from .config import configure_project, initialize_project_files, load_config
 from .conf import ensure_conf_lua
 from .packaging import build_love_package
@@ -24,6 +25,7 @@ def create_parser():
     subparsers.add_parser("init", help="Initialize project.toml, .loveignore, and conf.lua")
     subparsers.add_parser("pack", help="Package project source into a .love zip archive")
     subparsers.add_parser("build", help="Package project and fuse with LÖVE binaries into an executable")
+    subparsers.add_parser("clean", help="Remove generated build, distribution, and Python cache files")
 
     config_parser = subparsers.add_parser("config", help="Read and update project.toml settings")
     config_actions = config_parser.add_subparsers(dest="config_action", required=True)
@@ -70,6 +72,8 @@ def main():
             config = load_config(root_dir)
             love_file = build_love_package(root_dir, config)
             build_executable(root_dir, config, love_file)
+        elif args.command == "clean":
+            clean_project(root_dir)
     except (KeyError, ValueError, RuntimeError) as error:
         print(f"[ERROR] {error}")
         sys.exit(1)

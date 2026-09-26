@@ -12,7 +12,7 @@ version = "11.5"
 output_dir = "build"
 love_filename = "game.love"
 compile_bytecode = false
-lua_compiler = "luac"
+lua_compiler = "luajit"
 generate_conf_lua = true
 overwrite_conf_lua = false
 """
