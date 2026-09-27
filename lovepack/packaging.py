@@ -12,7 +12,8 @@ def load_ignore_patterns(root_dir: Path, config: dict) -> list[str]:
     ignore_path = root_dir / ".loveignore"
     patterns = [".git*", "build/*", ".loveignore", "external/*"]
     external_directory = config.get("external", {}).get("directory", "external")
-    patterns.append(f"{external_directory.rstrip('/\\')}/*")
+    external_directory = external_directory.rstrip("/\\")
+    patterns.append(f"{external_directory}/*")
     if ignore_path.exists():
         for line in ignore_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
