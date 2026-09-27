@@ -17,6 +17,10 @@ def default_config(root_dir: Path) -> dict:
             "generate_conf_lua": True,
             "overwrite_conf_lua": False,
         },
+        "external": {
+            "enabled": False,
+            "directory": "external",
+        },
     }
 
 

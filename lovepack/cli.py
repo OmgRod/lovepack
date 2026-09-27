@@ -7,7 +7,7 @@ from .config import configure_project, initialize_project_files, load_config
 from .conf import ensure_conf_lua
 from .github import setup_github_action
 from .packaging import build_love_package
-from .runtime import build_executable
+from .runtime import build_executable, run_love_game
 
 
 class CustomArgumentParser(argparse.ArgumentParser):
@@ -25,6 +25,7 @@ def create_parser():
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
     subparsers.add_parser("init", help="Initialize project.toml, .loveignore, and conf.lua")
     subparsers.add_parser("pack", help="Package project source into a .love zip archive")
+    subparsers.add_parser("test", help="Package the project and run it with Love2D")
     subparsers.add_parser("build", help="Package project and fuse with LÖVE binaries into an executable")
     subparsers.add_parser("clean", help="Remove generated build, distribution, and Python cache files")
     github_parser = subparsers.add_parser(
@@ -79,6 +80,10 @@ def main():
             )
         elif args.command == "pack":
             build_love_package(root_dir, load_config(root_dir))
+        elif args.command == "test":
+            config = load_config(root_dir)
+            love_file = build_love_package(root_dir, config)
+            run_love_game(root_dir, love_file)
         elif args.command == "build":
             config = load_config(root_dir)
             love_file = build_love_package(root_dir, config)

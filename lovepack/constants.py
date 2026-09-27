@@ -15,6 +15,10 @@ compile_bytecode = false
 lua_compiler = "luajit"
 generate_conf_lua = true
 overwrite_conf_lua = false
+
+[external]
+enabled = false
+directory = "external"
 """
 
 DEFAULT_LOVEIGNORE = """# Git & Dev Files
@@ -30,6 +34,7 @@ build/
 dist/
 *.love
 *.exe
+external/
 """
 
 CACHE_DIR = Path.home() / ".cache" / "lovepack"

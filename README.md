@@ -45,6 +45,34 @@ no `conf.lua` exists.
 file. Bytecode is written into the archive under the same `.lua` paths, which
 keeps `require` and `main.lua` resolution compatible.
 
+## External Platform Files
+
+Put release-only files under platform folders in `external/`:
+
+```text
+external/
+	win/
+		README.txt
+	mac/
+		Contents/Resources/license.txt
+	linux/
+		launch.sh
+```
+
+Enable the feature in `project.toml`:
+
+```toml
+[external]
+enabled = true
+directory = "external"
+```
+
+When enabled during `build`, each folder is copied into the root of that platform's output
+using its relative paths. `external/win` overlays the Windows runtime folder,
+`external/mac` overlays the macOS app bundle, and `external/linux` overlays
+`build/dist` beside the `.love` package. The staging folders are excluded from
+the `.love` archive.
+
 ## Game Icons
 
 Set an icon source in `project.toml`:
@@ -60,6 +88,13 @@ Windows build, lovepack converts that image to 256px Windows icon files named
 bundle's icons without modifying the source image or `.love` archive.
 
 ## Build Commands
+
+Run the packaged game locally with the Love2D executable available on your
+`PATH`:
+
+```powershell
+lovepack test
+```
 
 Remove generated Love2D builds, wheel distributions, and Python cache folders:
 

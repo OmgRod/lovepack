@@ -8,9 +8,11 @@ import zipfile
 from .conf import ensure_conf_lua
 
 
-def load_ignore_patterns(root_dir: Path) -> list[str]:
+def load_ignore_patterns(root_dir: Path, config: dict) -> list[str]:
     ignore_path = root_dir / ".loveignore"
-    patterns = [".git*", "build/*", ".loveignore"]
+    patterns = [".git*", "build/*", ".loveignore", "external/*"]
+    external_directory = config.get("external", {}).get("directory", "external")
+    patterns.append(f"{external_directory.rstrip('/\\')}/*")
     if ignore_path.exists():
         for line in ignore_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
@@ -75,7 +77,7 @@ def build_love_package(root_dir: Path, config: dict) -> Path:
     out_love_path = build_dir / love_filename
     ensure_conf_lua(root_dir, config)
 
-    patterns = load_ignore_patterns(root_dir)
+    patterns = load_ignore_patterns(root_dir, config)
     compile_bytecode = bool(build_config.get("compile_bytecode", False))
     lua_compiler = find_luajit(build_config.get("lua_compiler", "luajit")) if compile_bytecode else None
     if lua_compiler:

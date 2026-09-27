@@ -1,6 +1,7 @@
 import os
 import platform
 import shutil
+import subprocess
 import sys
 import tarfile
 import urllib.request
@@ -8,6 +9,7 @@ import zipfile
 from pathlib import Path
 
 from .constants import CACHE_DIR
+from .external import copy_external_files
 from .icons import generate_windows_icons
 
 
@@ -65,6 +67,30 @@ def download_love_binary(version: str) -> Path:
     return target_extract
 
 
+def find_love_executable() -> str:
+    for executable_name in ("love", "love2d", "love.exe", "love2d.exe"):
+        executable = shutil.which(executable_name)
+        if executable:
+            return executable
+    raise RuntimeError(
+        "Could not find a Love2D executable on PATH. "
+        "Install Love2D and make its executable available on PATH."
+    )
+
+
+def run_love_game(root_dir: Path, love_file: Path):
+    love_executable = find_love_executable()
+    print(f"\n[RUNNING] Starting Love2D with {love_file.name}...")
+    try:
+        return subprocess.run(
+            [love_executable, str(love_file)],
+            cwd=root_dir,
+            check=True,
+        )
+    except FileNotFoundError as error:
+        raise RuntimeError(f"Love2D executable could not be started: {love_executable}") from error
+
+
 def build_executable(root_dir: Path, config: dict, love_file: Path):
     version = config.get("love", {}).get("version", "11.5")
     os_name, _ = get_platform_info()
@@ -83,6 +109,7 @@ def build_executable(root_dir: Path, config: dict, love_file: Path):
         if exe_out_dir.exists():
             shutil.rmtree(exe_out_dir)
         shutil.copytree(love_exe.parent, exe_out_dir)
+        copy_external_files(root_dir, "win", exe_out_dir, config)
         generate_windows_icons(root_dir, config, exe_out_dir)
         target_exe = exe_out_dir / f"{game_name}.exe"
         with target_exe.open("wb") as output:
@@ -93,6 +120,7 @@ def build_executable(root_dir: Path, config: dict, love_file: Path):
     elif os_name == "linux":
         target_file = dist_dir / f"{game_name}.love"
         shutil.copy2(love_file, target_file)
+        copy_external_files(root_dir, "linux", dist_dir, config)
         print(
             f"[SUCCESS] Linux release output: {target_file.relative_to(root_dir)} "
             "(LÖVE 11.5 does not publish a Linux runtime binary)"
@@ -106,5 +134,6 @@ def build_executable(root_dir: Path, config: dict, love_file: Path):
         if target_app.exists():
             shutil.rmtree(target_app)
         shutil.copytree(love_app, target_app)
+        copy_external_files(root_dir, "macos", target_app, config)
         shutil.copy(love_file, target_app / "Contents" / "Resources" / "game.love")
         print(f"[SUCCESS] macOS App Bundle created: {target_app.relative_to(root_dir)}")
